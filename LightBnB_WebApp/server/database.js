@@ -15,6 +15,8 @@ pool.query(`SELECT title FROM properties LIMIT 10;`).then(response => {console.l
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
+
+//query that gets a user using email 
 const getUserWithEmail = function(email) {
  return pool
   .query(`SELECT * FROM users WHERE email = $1;`, [email])
@@ -33,6 +35,7 @@ exports.getUserWithEmail = getUserWithEmail;
  * @param {string} id The id of the user.
  * @return {Promise<{}>} A promise to the user.
  */
+//Gets user using a user id 
 const getUserWithId = function(id) {
   return pool
   .query(`SELECT * FROM users WHERE id = $1;`, [id])
@@ -52,6 +55,8 @@ exports.getUserWithId = getUserWithId;
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
+
+//adds a user (registering a new user on the LightBnB)
 const addUser =  function(user) {
   return pool
   .query (
@@ -110,42 +115,50 @@ exports.getAllReservations = getAllReservations;
   FROM properties
   JOIN property_reviews ON properties.id = property_id
   `;
-
+   //Checks for city filter
   if (options.city) {
     queryParams.push(`%${options.city}%`);
     queryString += `WHERE city LIKE $${queryParams.length}`;
   }
+  //checks owner id
   if (options.owner_id) {
-    queryParams.push(`%${options.owner_id}%`);
+    queryParams.push(`${options.owner_id}`);
     queryString += `AND owner_id = $${queryParams.length}`;
   }
+  //filters min price
   if (options.minimum_price_per_night) {
-    queryParams.push(`%${options.minimum_price_per_night}%`);
+    queryParams.push(`${options.minimum_price_per_night}`);
     queryString += `AND minimum_price_per_night >= $${queryParams.length} `;
   }
+  //filters max price
   if (options.maximum_price_per_night) {
-    queryParams.push(`%${options.maximum_price_per_night}%`);
+    queryParams.push(`${options.maximum_price_per_night}`);
     queryString += `AND maximum_price_per_night <= $${queryParams.length} `;
   }
+
+  queryString += `
+    GROUP BY properties.id`
+    //filters min rating 
   if (options.minimum_rating) {
-    queryParams.push(`%${options.minimum_rating}%`);
+    queryParams.push(`${options.minimum_rating}`);
     queryString += `HAVING avg(property_reviews.rating) >= $${queryParams.length} `;
   }
 
   queryParams.push(limit);
   queryString += `
-  GROUP BY properties.id
   ORDER BY cost_per_night
   LIMIT $${queryParams.length};
   `;
+
+  console.log(queryString, queryParams);
 
   return pool.query(queryString, queryParams)
   .then((res) => {
     return res.rows
   })
   .catch((err) => {
-    console.log(err.message);
-  });
+    return err.message
+  })
 
 };
 
