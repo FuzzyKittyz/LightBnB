@@ -21,11 +21,10 @@ const getUserWithEmail = function(email) {
  return pool
   .query(`SELECT * FROM users WHERE email = $1;`, [email])
   .then((res) => {
-    console.log(res.rows[0]);
     return res.rows[0];
   })
   .catch((err) => {
-    console.log(err.message);
+    return err.message;
   });
 }
 exports.getUserWithEmail = getUserWithEmail;
@@ -40,11 +39,10 @@ const getUserWithId = function(id) {
   return pool
   .query(`SELECT * FROM users WHERE id = $1;`, [id])
   .then((result) => {
-    console.log(result.rows[0]);
     return result.rows[0];
   })
   .catch((err) => {
-    return null
+    return err.message;
   })
 }
 exports.getUserWithId = getUserWithId;
@@ -94,7 +92,7 @@ const getAllReservations = function(guest_id, limit = 10) {
       return res.rows;
     })
     .catch((err) => {
-      console.log(err.message)
+      return err.message;
     })
 }
 exports.getAllReservations = getAllReservations;
@@ -150,14 +148,12 @@ exports.getAllReservations = getAllReservations;
   LIMIT $${queryParams.length};
   `;
 
-  console.log(queryString, queryParams);
-
   return pool.query(queryString, queryParams)
   .then((res) => {
-    return res.rows
+    return res.rows;
   })
   .catch((err) => {
-    return err.message
+    return err.message;
   })
 
 };
